@@ -16,40 +16,61 @@ services:
       DB_USER= "${USUARIO_BD}"
       DB_PASSWD= "${CONTRASENA_BD}"
     volumes:
-      - ficherosTienda=/var/www/html
+      - ficherosTienda:/var/www/html
     networks:
+      - interna
     ports:
       - "${PUERTO:-8080}:80"
     depends_on:
-    restart:
+      bd:
+        condition: service_healthy
+      correo:
+        condition: service_started
+    restart: unless-stopped
 
   bd:
-    image: prestashop/prestashop:8.2
+    image: mariadb:11.8
     environment:
+      MARIADB_ROOT_PASSWORD: "${CONTRASENA_BD}"
+      MARIADB_DATABASE: "${NOMBRE_BD}"
+      MARIADB_USER: "${USUARIO_BD}"
+      MARIADB_PASSWORD: "${CONTRASENA_BD}"
     volumes:
+      -  datos-db:/var/lib/mysql
     networks:
-    ports:
+      - interna
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--inoodb_initialized"]
       interval: 10s
       timeout: 5s
-      retries: 10
-      start_period: 30s
-    depends_on:
-    restart:
+      retries: 5
+    restart: unless-stopped
 
   correo:
-    image: prestashop/prestashop:8.2
-    environment:
-    volumes:
-    networks:
+    image: axllent/mailpit:v1.32
     ports:
+      - "${PUERTO_CORREO:-8025}:8025"
+    networks:
+      - interna
+    restart: unless-stopped
+
+  adminer:
+    image: adminer:5
+    environment:
+      ADMINER_DEFAULT_SERVER: bd
+    ports:
+      - "${PUERTO_ADMINER:-8081}:8080"
+    networks:
+      - interna
     depends_on:
-    restart:
+      - bd
+    restart: unless-stopped
 
 volumes:
   ficherosTienda:
+  datos-db:
 
 
 networks:
   interna:
+    

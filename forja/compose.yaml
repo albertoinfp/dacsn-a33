@@ -1,6 +1,6 @@
 services:
   tienda:
-    image: forgejo:17
+    image: codeberg.org/forgejo/forgejo:17
     environment:
       FORGEJO__database__DB_TYPE: postgres
       FORGEJO__database__HOST: bd:5432
@@ -41,20 +41,20 @@ services:
       - "${PUERTO:-3000}:3000"
       - "${PUERTO_SSH:-2222}:22"
     depends_on:
-     bd:
+      bd:
         condition: service_healthy
-        cache:
-          condition: service_healthy
-        correo:
-          condition: service_started
+      cache:
+        condition: service_healthy
+      correo:
+        condition: service_started
     restart: unless-stopped
 
   bd:
     image: postgres:18
     environment:
-      POSTGRES_DB: ${NOMBRE_BD}
-      POSTGRES_USER: ${USUARIO_BD}
-      POSTGRES_PASSWORD: ${CONTRASENA_BD}
+      POSTGRES_DB: ${BD_NOMBRE}
+      POSTGRES_USER: ${BD_USUARIO}
+      POSTGRES_PASSWORD: ${BD_CONTRASENA}
     volumes:
       - bd-datos:/var/lib/postgresql
     networks:

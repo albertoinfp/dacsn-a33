@@ -1,0 +1,41 @@
+services:
+  acortador:
+    image: nginx:1.30
+    volumes:
+      
+    networks:
+      - frontal
+    ports:
+     "${PUERTO:-8080}:80"
+    depends_on:
+      - yourls
+
+  yourls:
+    image: yourls:1.10.1-fpm
+    environment:
+     YOURLS_DB_HOST: bd
+     YOURLS_DB_NAME: ${BD_NOMBRE:-yourls}
+     YOURLS_DB_USER: ${BD_USUARIO:-yourls}
+     YOURLS_DB_PASS: ${BD_CONTRASENA:}
+     YOURLS_SITE: http://${DIRECCION:}:${PUERTO:-8080}
+     YOURLS_USER: ${YOURLS_USUARIO:-admin}
+     YOURLS_PASS: ${YOURLS_CONTRASENA:}
+    volumes:
+      
+    networks:
+      - frontal
+      - interna
+    depends_on:
+      bd:
+        condition: service_healthy
+    restart: unless-stopped
+
+
+volumes:
+  forgejo-datos:
+  bd-datos:
+  cache-datos:
+
+networks:
+  interna:
+    

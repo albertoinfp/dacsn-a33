@@ -1,5 +1,5 @@
 services:
-  tienda:
+  forgejo:
     image: codeberg.org/forgejo/forgejo:17
     environment:
       FORGEJO__database__DB_TYPE: postgres
